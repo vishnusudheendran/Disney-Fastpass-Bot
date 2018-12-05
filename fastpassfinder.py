@@ -228,7 +228,7 @@ def loopTimePeriod(driver, currentTimePeriod):
 def confirmRide(driver, ride, num, timeNum, rideLocation):
     if timeNum == 0:
         timeNum = 1
-    timeText = driver.find_element_by_xpath("""//*[@id="selectExperienceExperiencesList"]/div[""" + str(rideLocation) + """]/div[2]/div[""" + str(num) + """]/div/div[2]/div/div[""" + str(timeNum) + """]""").click()
+    driver.find_element_by_xpath("""//*[@id="selectExperienceExperiencesList"]/div[""" + str(rideLocation) + """]/div[2]/div[""" + str(num) + """]/div/div[2]/div/div[""" + str(timeNum) + """]""").click()
     sleep(2)
     while True:
         try:
@@ -357,6 +357,23 @@ def animalEpcotHollywoodParkHandler(driver, park, ride, minHour, maxHour):
 
     return False
 
+def loopTimeAndConfirmRide(driver, park, ride, minHour, maxHour):
+    allRidesFound = False
+    currentTimePeriod = 1
+
+    while allRidesFound == False:
+        sleep(60)
+
+        #If the park is magic kingdom, it has its seperate function because of the different HTML layout on the website
+        if park == "1":
+            allRidesFound = magicKingdomParkHandler(driver, ride, minHour, maxHour)
+        else:
+            allRidesFound = animalEpcotHollywoodParkHandler(driver, park, ride, minHour, maxHour)
+
+        #Click button to switch between morning, afternoon, and evening time periods
+        if allRidesFound == False:
+            currentTimePeriod = loopTimePeriod(driver, currentTimePeriod)
+
 def regularSelection(park, ride, numGuests, minHour, maxHour):
     
     ride = convertRideNumToText(park, ride)
@@ -377,22 +394,7 @@ def regularSelection(park, ride, numGuests, minHour, maxHour):
     print("\n---PLEASE CHOOSE A DATE ON SCREEN NOW---")
 
     selectPark(driver, park)
-
-    allRidesFound = False
-    currentTimePeriod = 1
-
-    while allRidesFound == False:
-        sleep(15)
-
-        #If the park is magic kingdom, it has its seperate function because of the different HTML layout on the website
-        if park == "1":
-            allRidesFound = magicKingdomParkHandler(driver, ride, minHour, maxHour)
-        else:
-            allRidesFound = animalEpcotHollywoodParkHandler(driver, park, ride, minHour, maxHour)
-
-        #Click button to switch between morning, afternoon, and evening time periods
-        if allRidesFound == False:
-            currentTimePeriod = loopTimePeriod(driver, currentTimePeriod)
+    loopTimeAndConfirmRide(driver, park, ride, minHour, maxHour)
 
 def modifySelection(park, ride, numGuests, minHour, maxHour):
     print("\nSelect the existing FastPass selction you want to Modify:")    
@@ -407,21 +409,7 @@ def modifySelection(park, ride, numGuests, minHour, maxHour):
     signIn(driver)
     selectRideToModify(driver, rideToModifyToText)
     selectAllGuests(driver)
-    allRidesFound = False
-    currentTimePeriod = 1
-
-    while allRidesFound == False:
-        sleep(15)
-
-        #If the park is magic kingdom, it has its seperate function because of the different HTML layout on the website
-        if park == "1":
-            allRidesFound = magicKingdomParkHandler(driver, ride, minHour, maxHour)
-        else:
-            allRidesFound = animalEpcotHollywoodParkHandler(driver, park, ride, minHour, maxHour)
-
-        #Click button to switch between morning, afternoon, and evening time periods
-        if allRidesFound == False:
-            currentTimePeriod = loopTimePeriod(driver, currentTimePeriod)
+    loopTimeAndConfirmRide(driver, park, ride, minHour, maxHour)
 
 #Where the program starts
 def main():
