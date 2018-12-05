@@ -87,6 +87,20 @@ def getNumberOfGuests():
     if numGuests == "2" and len(credentials.guests) == 0:
         sys.exit("You need to enter your guest's id's in credentials.py file before continuing")
     return numGuests
+	
+#Returns if this is a modification of existing selection
+def getIsModification():
+
+    isModification = input("\nIs this a modification of existing FastPass selection:\n" +
+                  "       1.) Yes\n" +
+                  "       2.) No\n" +
+                  "Option: ")
+    while isModification != "1" and isModification != "2":
+          isModification = input("--INVALID CHOICE-- Is this a modification of existing FastPass selection:\n" +
+                      "       1.) Yes\n" +
+                      "       2.) No\n"+
+                      "Option: ")
+    return isModification
 
 #Converts the ride number to the actual ride name
 def convertRideNumToText(park, ride):
@@ -224,6 +238,22 @@ def confirmRide(driver, ride, num, timeNum, rideLocation):
         except:
             continue
 
+def selectRideToModify(driver, rideToModify):
+    sleep(5)
+    ride = " "+str(rideToModify)
+    xpathViewDetail = """//*[@aria-label=\""""+str(ride)+"""\"]"""
+    driver.find_element_by_xpath(xpathViewDetail).click()
+    sleep(2)
+    xpathModify = """//*[@id="fastPasslandingPage"]/div[2]/div[2]/div/div/div[2]/div/div[2]/div[1]/div/div[1]"""
+    driver.find_element_by_xpath(xpathModify).click()
+
+def selectAllGuests(driver):
+    sleep(2)
+    xpathSelectAll = """//*[@id="updateSelectionSelectPartyPage"]/div[2]/div[3]/div[2]/div/span"""
+    driver.find_element_by_xpath(xpathSelectAll).click()
+    sleep(2)
+    xpathNext = """//*[@id="updateSelectionSelectPartyPage"]/div[3]/div/div[2]/div"""
+    driver.find_element_by_xpath(xpathNext).click()
 
 def checkTime(driver, num, minHour, maxHour, rideLocation):
     if minHour == False:
@@ -327,7 +357,71 @@ def animalEpcotHollywoodParkHandler(driver, park, ride, minHour, maxHour):
 
     return False
 
+def regularSelection(park, ride, numGuests, minHour, maxHour):
+    
+    ride = convertRideNumToText(park, ride)
 
+    printOutRidesChosen(park, ride, numGuests, minHour, maxHour) #Prints out chosen rides and converts ride number to actual ride name
+
+
+    driver = createChromeDriver()
+
+    driver.get("https://disneyworld.disney.go.com/fastpass-plus/")
+
+    clickGetStartedButton(driver)
+
+    signIn(driver)
+
+    selectGuests(driver, numGuests)
+
+    print("\n---PLEASE CHOOSE A DATE ON SCREEN NOW---")
+
+    selectPark(driver, park)
+
+    allRidesFound = False
+    currentTimePeriod = 1
+
+    while allRidesFound == False:
+        sleep(15)
+
+        #If the park is magic kingdom, it has its seperate function because of the different HTML layout on the website
+        if park == "1":
+            allRidesFound = magicKingdomParkHandler(driver, ride, minHour, maxHour)
+        else:
+            allRidesFound = animalEpcotHollywoodParkHandler(driver, park, ride, minHour, maxHour)
+
+        #Click button to switch between morning, afternoon, and evening time periods
+        if allRidesFound == False:
+            currentTimePeriod = loopTimePeriod(driver, currentTimePeriod)
+
+def modifySelection(park, ride, numGuests, minHour, maxHour):
+    print("\nSelect the existing FastPass selction you want to Modify:")    
+    rideToModify = getRide(park)
+    ride = convertRideNumToText(park, ride)
+    rideToModifyToText = convertRideNumToText(park, rideToModify)
+    print("\nRide to Modify:"+rideToModifyToText)
+    printOutRidesChosen(park, ride, numGuests, minHour, maxHour) #Prints out chosen rides and converts ride number to actual ride name
+    driver = createChromeDriver()
+    driver.get("https://disneyworld.disney.go.com/fastpass-plus/")
+    clickGetStartedButton(driver)
+    signIn(driver)
+    selectRideToModify(driver, rideToModifyToText)
+    selectAllGuests(driver)
+    allRidesFound = False
+    currentTimePeriod = 1
+
+    while allRidesFound == False:
+        sleep(15)
+
+        #If the park is magic kingdom, it has its seperate function because of the different HTML layout on the website
+        if park == "1":
+            allRidesFound = magicKingdomParkHandler(driver, ride, minHour, maxHour)
+        else:
+            allRidesFound = animalEpcotHollywoodParkHandler(driver, park, ride, minHour, maxHour)
+
+        #Click button to switch between morning, afternoon, and evening time periods
+        if allRidesFound == False:
+            currentTimePeriod = loopTimePeriod(driver, currentTimePeriod)
 
 #Where the program starts
 def main():
@@ -355,46 +449,13 @@ def main():
         maxHour = False
 
     numGuests = getNumberOfGuests()
-
-    ride = convertRideNumToText(park, ride)
-
-    printOutRidesChosen(park, ride, numGuests, minHour, maxHour) #Prints out chosen rides and converts ride number to actual ride name
-
-
-    driver = createChromeDriver()
-
-    driver.get("https://disneyworld.disney.go.com/fastpass-plus/")
-
-    clickGetStartedButton(driver)
-
-    signIn(driver)
-
-    selectGuests(driver, numGuests)
-
-    print("\n---PLEASE CHOOSE A DATE ON SCREEN NOW---")
-
-    selectPark(driver, park)
-
-    allRidesFound = False
-    currentTimePeriod = 1
-
-
-    while allRidesFound == False:
-        sleep(5)
-
-        #If the park is magic kingdom, it has its seperate function because of the different HTML layout on the website
-        if park == "1":
-            allRidesFound = magicKingdomParkHandler(driver, ride, minHour, maxHour)
-        else:
-            allRidesFound = animalEpcotHollywoodParkHandler(driver, park, ride, minHour, maxHour)
-
-        #Click button to switch between morning, afternoon, and evening time periods
-        if allRidesFound == False:
-            currentTimePeriod = loopTimePeriod(driver, currentTimePeriod)
+	
+    modifyRide = getIsModification()
+	
+    if modifyRide == "1":
+        modifySelection(park, ride, numGuests, minHour, maxHour)
+    else:
+        regularSelection(park, ride, numGuests, minHour, maxHour)
 
 if __name__ == '__main__':
     main()
-
-
-
-
