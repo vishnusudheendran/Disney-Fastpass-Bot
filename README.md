@@ -11,3 +11,5 @@
   <li>Step 7: Go to https://disneyworld.disney.go.com/en_US/profile/family-friends/ . You will see your profile and the other guests you added. Right clcik on the guest and select Inspect element and guest id. Put that guest id in the credentials file</li>
   <li>Step 8: All ready to go! Launch fastpassfinder.py and follow the instructions on the console</li>
 </ul>
+<h3>Note:</h3><span>While looping through Morning, Afternoon and Evnening time slots the program will wait 60 seconds in between to avoid getting error page by Disney. The error page appears when we send lot of request in a short span of time.</span>
+<h3>Disclaimer:</h3><span>This program is for educational purpose only. So use it at your own risk.</span>
