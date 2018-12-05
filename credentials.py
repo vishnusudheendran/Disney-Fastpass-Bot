@@ -25,4 +25,7 @@ guests = [""]
 
 
 #The path to chromedriver
-path = ""
+"""
+path = r"C:\Users\YOURUSER\Desktop\Disney Fastpass Bot\chromedriver.exe"
+"""
+path = r""
